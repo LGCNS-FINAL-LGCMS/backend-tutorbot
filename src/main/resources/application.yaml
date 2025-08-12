@@ -1,0 +1,3 @@
+spring:
+  application:
+    name: tutor_bot

@@ -1,0 +1,35 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:38121/tutor
+    username: lgcms
+    password: 1234
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    show-sql: false
+    database: postgresql
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+  ai:
+    model:
+      embedding: bedrock-titan
+      chat: bedrock-converse
+    bedrock:
+      aws:
+        region: ap-northeast-2 # 서울리전
+      titan:
+        embedding:
+          model: amazon.titan-embed-text-v2:0
+          input-type: text
+
+server:
+  port: 38114  #tutor
+
+tutor:
+  chat:
+    max-context-length: 4000
+    max-history-turns: 10
+    default-top-k: 5
+    similarity-threshold: 0.7
