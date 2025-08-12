@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:38121/lgmcs
+    url: jdbc:postgresql://localhost:38121/tutor
     username: lgcms
     password: 1234
     driver-class-name: org.postgresql.Driver
@@ -13,12 +13,6 @@ spring:
       hibernate:
         format_sql: true
   ai:
-    openai:
-      api-key: ${OPENAI_API_KEY}
-      chat:
-        model: gpt-4o-mini
-        temperature: 0.2
-        max-tokens: 2000
     model:
       embedding: bedrock-titan
       chat: bedrock-converse
