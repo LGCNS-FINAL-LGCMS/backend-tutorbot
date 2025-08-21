@@ -11,7 +11,6 @@ import org.springframework.ai.reader.pdf.PagePdfDocumentReader;
 import org.springframework.ai.reader.pdf.config.PdfDocumentReaderConfig;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,15 +19,12 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class PdfEtlService {
-    private final ResourceLoader resourceLoader;
     private final VectorStore vectorStore;
 
     // 클래스 패스에서 pdf 리소스 처리
-    public void processClasspathPdf(String resourcePath){
+    public void processClasspathPdf(Resource pdfResource) {
         try{
-            Resource pdfResource = resourceLoader.getResource("classpath:" + resourcePath);
-
-            if(!pdfResource.exists()){
+            if(!pdfResource.exists()) {
                 throw new BaseException(TutorError.PDF_NOT_FOUND);
             }
 
@@ -42,9 +38,6 @@ public class PdfEtlService {
                                             .withNumberOfTopPagesToSkipBeforeDelete(1)
                                             .build()
                             )
-//                            .withPageTopMargin(0)
-//                            .withPageBottomMargin(0)
-//                            .withPagesPerDocument(1)  // 각 페이지를 별도 문서로 처리
                             .build());
 
             List<Document> documents = pdfReader.get();
@@ -57,7 +50,7 @@ public class PdfEtlService {
 
             // 메타데이터 추가
             chunks.forEach(chunk -> {
-                chunk.getMetadata().put("source", resourcePath);
+                chunk.getMetadata().put("source", pdfResource.getFilename());
                 chunk.getMetadata().put("type", "pdf");
                 chunk.getMetadata().put("processed_at", System.currentTimeMillis());
                 chunk.getMetadata().put("chunk_size", chunk.getFormattedContent().length());
@@ -66,7 +59,8 @@ public class PdfEtlService {
             // 벡터 스토어에 저장
             vectorStore.add(chunks);
 
-        } catch (BaseException e) {
+        } catch (Exception e) {
+            log.error(e.getMessage());
             throw new BaseException(TutorError.PDF_PROCESSING_ERROR);
         }
     }
