@@ -8,28 +8,49 @@ spring:
     show-sql: false
     database: postgresql
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     properties:
       hibernate:
         format_sql: true
   ai:
+    chat:
+      memory:
+        repository:
+          jdbc:
+            initialize-schema: never
     model:
       embedding: bedrock-titan
       chat: bedrock-converse
     bedrock:
       aws:
-        region: ap-northeast-2 # 서울리전
+        region: ${AWS_REGION}
+        access-key: ${AWS_ACCESS_KEY_ID}
+        secret-key: ${AWS_SECRET_ACCESS_KEY}
       titan:
         embedding:
           model: amazon.titan-embed-text-v2:0
           input-type: text
+      converse:
+        chat:
+          options:
+            model: "anthropic.claude-3-haiku-20240307-v1:0"
+            temperature: 0.3
+            max-tokens: 2000
+    vectorstore:
+      pgvector:
+        index-type: HNSW
+        distance-type: COSINE_DISTANCE
+        initialize-schema: true
+        table-name: tutor_bot_embedded_q
+        dimensions: 1024
 
 server:
   port: 38114  #tutor
 
-tutor:
-  chat:
-    max-context-length: 4000
-    max-history-turns: 10
-    default-top-k: 5
-    similarity-threshold: 0.7
+#logging:
+#  level:
+#    org:
+#      springframework:
+#        ai: DEBUG
+#        aI:
+#          chat: TRACE
