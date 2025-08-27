@@ -11,8 +11,10 @@ import org.springframework.ai.reader.pdf.PagePdfDocumentReader;
 import org.springframework.ai.reader.pdf.config.PdfDocumentReaderConfig;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
 import java.util.List;
 
 @Slf4j
@@ -21,14 +23,14 @@ import java.util.List;
 public class PdfEtlService {
     private final VectorStore vectorStore;
 
-    // 클래스 패스에서 pdf 리소스 처리
-    public void processClasspathPdf(Resource pdfResource) {
+    // 이벤트 발행 시에만 사용 new
+    public void processUrlPdf(String pdfUrl) {
         try{
+            Resource pdfResource = new UrlResource(new URI(pdfUrl).toURL());
             if(!pdfResource.exists()) {
                 throw new BaseException(TutorError.PDF_NOT_FOUND);
             }
 
-            // pdf 리더 설정
             PagePdfDocumentReader pdfReader = new PagePdfDocumentReader(
                     pdfResource,
                     PdfDocumentReaderConfig.builder()
@@ -42,21 +44,18 @@ public class PdfEtlService {
 
             List<Document> documents = pdfReader.get();
 
-            // 텍스트 분할
             TokenTextSplitter textSplitter = new TokenTextSplitter(1000,200,50,10000,true);
-
-            // 텍스트 청크 분할
+            // 1000, 400, 10, 5000, true
             List<Document> chunks = textSplitter.apply(documents);
 
-            // 메타데이터 추가
+            Resource finalPdfResource = pdfResource;
             chunks.forEach(chunk -> {
-                chunk.getMetadata().put("source", pdfResource.getFilename());
+                chunk.getMetadata().put("source", finalPdfResource.getFilename());
                 chunk.getMetadata().put("type", "pdf");
                 chunk.getMetadata().put("processed_at", System.currentTimeMillis());
                 chunk.getMetadata().put("chunk_size", chunk.getFormattedContent().length());
             });
 
-            // 벡터 스토어에 저장
             vectorStore.add(chunks);
 
         } catch (Exception e) {

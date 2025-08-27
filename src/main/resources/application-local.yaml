@@ -34,8 +34,7 @@ spring:
         chat:
           options:
             model: "anthropic.claude-3-haiku-20240307-v1:0"
-            temperature: 0.3
-            max-tokens: 2000
+            maxTokens: 1024
     vectorstore:
       pgvector:
         index-type: HNSW
@@ -43,6 +42,20 @@ spring:
         initialize-schema: true
         table-name: tutor_bot_embedded_q
         dimensions: 1024
+
+  kafka:
+    bootstrap-servers: http://192.168.0.161:38123
+    consumer:
+      group-id: ${spring.application.name}
+      enable-auto-commit: false
+      auto-offset-reset: latest
+      max-poll-records: 10
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.use.type.headers: false
+    producer:
+      properties:
+        spring.json.add.type.headers: false
 
 server:
   port: 38114  #tutor
