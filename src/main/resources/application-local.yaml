@@ -47,6 +47,7 @@ spring:
             top-k: 4
             search:
               similarity-threshold: 0.6
+
     vectorstore:
       pgvector:
         index-type: HNSW
