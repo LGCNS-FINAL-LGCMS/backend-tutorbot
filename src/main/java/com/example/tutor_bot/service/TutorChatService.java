@@ -25,9 +25,6 @@ public class TutorChatService {
 
     private static final String NEGATIVE_MSG = "죄송";
 
-    @Value("${spring.ai.bedrock.converse.chat.options.top-k}")
-    private Integer topK;
-
     @Value("${spring.ai.bedrock.converse.chat.options.search.similarity-threshold}")
     private Double similarityThreshold;
 
@@ -72,7 +69,6 @@ public class TutorChatService {
     private List<Document> searchRelevantDocuments(String query) {
         SearchRequest searchRequest = SearchRequest.builder()
                 .query(query)
-                .topK(topK)
                 .similarityThreshold(similarityThreshold)
                 .build();
 

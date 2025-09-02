@@ -23,16 +23,12 @@ public class ChatClientConfig {
     @Value("${spring.ai.bedrock.converse.chat.options.temperature}")
     private Double temperature;
 
-    @Value("${spring.ai.bedrock.converse.chat.options.top-k}")
-    private Integer topK;
-
     @Bean
     public ChatClient chatClient(ChatModel chatModel) {
         ChatOptions defaultOptions = ChatOptions.builder()
                 .model(model)
                 .temperature(temperature)
                 .maxTokens(maxTokens)
-                .topK(topK)
                 .build();
 
         return ChatClient.builder(chatModel)
