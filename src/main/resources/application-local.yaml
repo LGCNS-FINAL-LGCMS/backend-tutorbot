@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: backend-tutor
   datasource:
     url: jdbc:postgresql://localhost:38121/tutor
     username: lgcms
@@ -71,3 +73,11 @@ spring:
 
 server:
   port: 38114  #tutor
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus,health,info
+  metrics:
+    tags:
+      application: ${spring.application.name}
