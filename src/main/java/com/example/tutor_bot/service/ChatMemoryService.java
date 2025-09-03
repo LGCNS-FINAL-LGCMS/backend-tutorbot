@@ -24,12 +24,12 @@ public class ChatMemoryService {
     @Value("${spring.ai.chat.memory.redis.time-to-live}")
     private Duration TIME_TO_LIVE;
 
-    private String buildKey(String lectureId, String userId){
-        return KEY_PREFIX + lectureId + ":" + userId;
+    private String buildKey(String lectureId, Long memberId){
+        return KEY_PREFIX + lectureId + ":" + memberId;
     }
 
-    public void saveChatMessage(String lectureId, String userId, String message) {
-        String key = buildKey(lectureId, userId);
+    public void saveChatMessage(String lectureId, Long memberId, String message) {
+        String key = buildKey(lectureId, memberId);
         log.info("key={} message={}", key, message);
 
         redisTemplate.opsForList().rightPush(key, message);
@@ -37,8 +37,8 @@ public class ChatMemoryService {
         redisTemplate.expire(key, TIME_TO_LIVE);  // 2, TimeUnit.HOURS
     }
 
-    public List<String> getChatMessage(String lectureId, String userId) {
-        String key = buildKey(lectureId, userId);
+    public List<String> getChatMessage(String lectureId, Long memberId) {
+        String key = buildKey(lectureId, memberId);
         return redisTemplate.opsForList().range(key, 0, -1);
     }
 }

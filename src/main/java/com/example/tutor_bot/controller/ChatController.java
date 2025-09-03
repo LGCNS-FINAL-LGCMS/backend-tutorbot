@@ -17,11 +17,11 @@ public class ChatController {
     private final TutorChatService tutorChatService;
 
     @PostMapping("/student/tutor")
-    public ResponseEntity<BaseResponse<TutorChatResponse>> askQuestion(@RequestBody ChatRequest request) {
+    public ResponseEntity<BaseResponse<TutorChatResponse>> askQuestion(@RequestBody ChatRequest request, @RequestHeader("X-USER-ID") Long memberId) {
         if(request.getQuestion() == null || request.getQuestion().trim().isEmpty()){
             throw new BaseException(TutorError.CHAT_EMPTY_QUESTION);
         }
-        TutorChatResponse response = tutorChatService.processQuestion(request);
+        TutorChatResponse response = tutorChatService.processQuestion(request, memberId);
         return ResponseEntity.ok(BaseResponse.ok(response));
     }
 }
