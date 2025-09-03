@@ -20,6 +20,6 @@ public class LectureEventConsumer {
     @KafkaListener(topics = "LECTURE_UPLOAD", containerFactory = "defaultFactory")
     public void topicEvent(KafkaEvent<?> kafkaEvent) {
         LectureUploadDto uploadDto = kafkaEventFactory.convert(kafkaEvent, LectureUploadDto.class);
-        pdfEtlService.processUrlPdf(uploadDto.getBookKey());
+        pdfEtlService.processUrlPdf(uploadDto.getBookKey(), uploadDto.getLectureId());
     }
 }

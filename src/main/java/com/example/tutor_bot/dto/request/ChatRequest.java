@@ -11,6 +11,5 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ChatRequest {
     private String lectureId;
-    private String userId;
     private String question;
 }

@@ -10,6 +10,8 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.ai.vectorstore.filter.Filter;
+import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -28,14 +30,16 @@ public class TutorChatService {
     @Value("${spring.ai.bedrock.converse.chat.options.search.similarity-threshold}")
     private Double similarityThreshold;
 
-    public TutorChatResponse processQuestion(ChatRequest request) {
+    public TutorChatResponse processQuestion(ChatRequest request, Long memberId) {
         try {
             String lectureId = request.getLectureId();
-            String userId = request.getUserId();
-            String question = request.getQuestion();
-            String context = buildContext(searchRelevantDocuments(question));
 
-            List<String> previousChats = chatMemoryService.getChatMessage(lectureId, userId);
+            if(lectureId == null ||lectureId.isBlank()) {
+                throw new IllegalAccessException("lectureId와 memberId은 null 값 허용하지 않습니다.");
+            }
+            String question = request.getQuestion();
+            String context = buildContext(searchRelevantDocuments(question, lectureId));
+            List<String> previousChats = chatMemoryService.getChatMessage(lectureId, memberId);
 
             String history = String.join("\n", previousChats);
             String currentUserPrompt = buildPrompt(question, context);
@@ -47,8 +51,8 @@ public class TutorChatService {
                     .content();
 
             if(!containsNegativeMsg(answer)){
-                chatMemoryService.saveChatMessage(lectureId, userId, question);
-                chatMemoryService.saveChatMessage(lectureId, userId, answer);
+                chatMemoryService.saveChatMessage(lectureId, memberId, question);
+                chatMemoryService.saveChatMessage(lectureId, memberId, answer);
             }
 
             return TutorChatResponse.builder()
@@ -66,10 +70,14 @@ public class TutorChatService {
         return answer !=  null && answer.contains(NEGATIVE_MSG);
     }
 
-    private List<Document> searchRelevantDocuments(String query) {
+    private List<Document> searchRelevantDocuments(String query, String lectureId) {
+        FilterExpressionBuilder filterExpressionBuilder = new FilterExpressionBuilder();
+        Filter.Expression metadataLectureId = filterExpressionBuilder.eq("lectureId", lectureId).build();
+
         SearchRequest searchRequest = SearchRequest.builder()
                 .query(query)
                 .similarityThreshold(similarityThreshold)
+                .filterExpression(metadataLectureId)
                 .build();
 
         return vectorStore.similaritySearch(searchRequest);

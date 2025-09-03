@@ -24,7 +24,7 @@ public class PdfEtlService {
     private final VectorStore vectorStore;
 
     // 이벤트 발행 시에만 사용 new
-    public void processUrlPdf(String pdfUrl) {
+    public void processUrlPdf(String pdfUrl, String lectureId) {
         try{
             Resource pdfResource = new UrlResource(new URI(pdfUrl).toURL());
             if(!pdfResource.exists()) {
@@ -52,6 +52,7 @@ public class PdfEtlService {
             chunks.forEach(chunk -> {
                 chunk.getMetadata().put("source", finalPdfResource.getFilename());
                 chunk.getMetadata().put("type", "pdf");
+                chunk.getMetadata().put("lectureId", lectureId);
                 chunk.getMetadata().put("processed_at", System.currentTimeMillis());
                 chunk.getMetadata().put("chunk_size", chunk.getFormattedContent().length());
             });
