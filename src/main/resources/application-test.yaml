@@ -1,0 +1,83 @@
+spring:
+  application:
+    name: backend-tutor
+  datasource:
+    url: jdbc:postgresql://localhost:5432/testdb
+    username: lgcms
+    password: 1234
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 1
+  ai:
+    chat:
+      memory:
+        redis:
+          enabled: true
+          options:
+            capacity: 10
+          key-prefix: "lecture_user="
+          time-to-live: "2h"
+    model:
+      embedding: bedrock-titan
+      chat: bedrock-converse
+    bedrock:
+      aws:
+        region: awsregion
+        access-key: accesskey
+        secret-key: secretkey
+      titan:
+        embedding:
+          model: amazon.titan-embed-text-v2:0
+          input-type: text
+      converse:
+        chat:
+          options:
+            model: "anthropic.claude-3-haiku-20240307-v1:0"
+            max-tokens: 1024
+            temperature: 0.3
+            search:
+              similarity-threshold: 0.5
+
+    vectorstore:
+      pgvector:
+        index-type: HNSW
+        distance-type: COSINE_DISTANCE
+        initialize-schema: true
+        table-name: tutor_bot_embedded_q
+        dimensions: 1024
+
+  kafka:
+    bootstrap-servers: http://localhost:9092
+    consumer:
+      group-id: ${spring.application.name}
+      enable-auto-commit: false
+      auto-offset-reset: latest
+      max-poll-records: 10
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.use.type.headers: false
+    producer:
+      properties:
+        spring.json.add.type.headers: false
+
+server:
+  port: 38114  #tutor
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus,health,info
+  metrics:
+    tags:
+      application: ${spring.application.name}
