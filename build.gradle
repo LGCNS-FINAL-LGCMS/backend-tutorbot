@@ -51,6 +51,8 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 }
 
 dependencyManagement {
@@ -61,4 +63,20 @@ dependencyManagement {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+jar {
+	enabled = false
+}
+
+tasks.register("getAppName") {
+	doLast {
+		println("${rootProject.name}")
+	}
+}
+
+tasks.register("getAppVersion") {
+	doLast {
+		println("${rootProject.version}")
+	}
 }

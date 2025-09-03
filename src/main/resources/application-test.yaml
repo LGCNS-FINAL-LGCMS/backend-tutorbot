@@ -2,7 +2,7 @@ spring:
   application:
     name: backend-tutor
   datasource:
-    url: jdbc:postgresql://localhost:38121/tutor
+    url: jdbc:postgresql://localhost:5432/testdb
     username: lgcms
     password: 1234
     driver-class-name: org.postgresql.Driver
@@ -17,7 +17,7 @@ spring:
   data:
     redis:
       host: localhost
-      port: 38122
+      port: 6379
       database: 1
   ai:
     chat:
@@ -33,9 +33,9 @@ spring:
       chat: bedrock-converse
     bedrock:
       aws:
-        region: ${AWS_REGION}
-        access-key: ${AWS_ACCESS_KEY_ID}
-        secret-key: ${AWS_SECRET_ACCESS_KEY}
+        region: awsregion
+        access-key: accesskey
+        secret-key: secretkey
       titan:
         embedding:
           model: amazon.titan-embed-text-v2:0
@@ -58,7 +58,7 @@ spring:
         dimensions: 1024
 
   kafka:
-    bootstrap-servers: http://192.168.0.161:38123
+    bootstrap-servers: http://localhost:9092
     consumer:
       group-id: ${spring.application.name}
       enable-auto-commit: false
