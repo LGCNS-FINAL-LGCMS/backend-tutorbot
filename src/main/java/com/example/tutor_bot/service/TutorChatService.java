@@ -87,9 +87,9 @@ public class TutorChatService {
     }
 
     private String buildContext(List<Document> documents) {
-        if (documents.isEmpty()) {
-            return "관련 정보를 찾을 수 없습니다.";
-        }
+//        if (documents.isEmpty()) {
+//            return "관련 정보를 찾을 수 없습니다.";
+//        }
         StringBuilder context = new StringBuilder();
 
         for (Document doc : documents) {
