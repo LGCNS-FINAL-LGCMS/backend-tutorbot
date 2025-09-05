@@ -35,11 +35,14 @@ public class TutorChatService {
             String lectureId = request.getLectureId();
 
             if(lectureId == null ||lectureId.isBlank()) {
-                throw new IllegalAccessException("lectureId와 memberId은 null 값 허용하지 않습니다.");
+                throw new IllegalAccessException("lectureId는 null 값 허용하지 않습니다.");
             }
             String question = request.getQuestion();
             String context = buildContext(searchRelevantDocuments(question, lectureId));
-            List<String> previousChats = chatMemoryService.getChatMessage(lectureId, memberId);
+            List<String> previousChats = chatMemoryService.getChatMessage(lectureId, memberId)
+                    .stream()
+                    .filter(msg->!msg.contains(NEGATIVE_MSG))
+                    .toList();
 
             String history = String.join("\n", previousChats);
             String currentUserPrompt = buildPrompt(question, context);
