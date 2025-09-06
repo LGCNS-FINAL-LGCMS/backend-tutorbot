@@ -47,7 +47,7 @@ spring:
             max-tokens: 1024
             temperature: 0.3
             search:
-              similarity-threshold: 0.6
+              similarity-threshold: 0.7
 
     vectorstore:
       pgvector:
