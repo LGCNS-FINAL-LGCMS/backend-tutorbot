@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.example'
-version = '0.3'
+version = '0.4'
 
 java {
     toolchain {
@@ -51,8 +51,13 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-	implementation 'org.springframework.boot:spring-boot-starter-actuator'
-	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+
+    implementation 'io.micrometer:micrometer-tracing-bridge-otel' // 트레이싱
+    implementation 'io.opentelemetry:opentelemetry-exporter-otlp' // otel exporter
+    implementation 'net.ttddyy.observation:datasource-micrometer-spring-boot:1.1.2' // JDBC 트레이싱
 }
 
 dependencyManagement {
