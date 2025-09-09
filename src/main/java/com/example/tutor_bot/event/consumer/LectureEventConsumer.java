@@ -17,7 +17,7 @@ public class LectureEventConsumer {
     private final KafkaEventFactory  kafkaEventFactory;
 
     // 토픽 구독 후 이벤트 받음
-    @KafkaListener(topics = "LECTURE_UPLOAD", containerFactory = "defaultFactory")
+    @KafkaListener(topics = "LECTURE_UPLOAD")
     public void topicEvent(KafkaEvent<?> kafkaEvent) {
         LectureUploadDto uploadDto = kafkaEventFactory.convert(kafkaEvent, LectureUploadDto.class);
         pdfEtlService.processUrlPdf(uploadDto.getBookKey(), uploadDto.getLectureId());
