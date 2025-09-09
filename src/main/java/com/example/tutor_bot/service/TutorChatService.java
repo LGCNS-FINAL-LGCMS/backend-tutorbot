@@ -7,6 +7,9 @@ import com.example.tutor_bot.dto.response.TutorChatResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
@@ -15,6 +18,7 @@ import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -38,18 +42,26 @@ public class TutorChatService {
                 throw new IllegalAccessException("lectureId는 null 값 허용하지 않습니다.");
             }
             String question = request.getQuestion();
-            String context = buildContext(searchRelevantDocuments(question, lectureId));
             List<String> previousChats = chatMemoryService.getChatMessage(lectureId, memberId)
                     .stream()
                     .filter(msg->!msg.contains(NEGATIVE_MSG))
                     .toList();
+          
+            List<Message> messages = new ArrayList<>();
+            for(int i = 0; i<previousChats.size(); i++){
+                String msg = previousChats.get(i);
+                if(i % 2 == 0) messages.add(new UserMessage(msg));
+                else messages.add(new AssistantMessage(msg));
+            }
 
-            String history = String.join("\n", previousChats);
-            String currentUserPrompt = buildPrompt(question, context);
-            String userPrompt = history + "\n" + currentUserPrompt;
+            String context = buildContext(searchRelevantDocuments(question, lectureId));
+            if(!context.isBlank()){
+                messages.add(new UserMessage("참고 자료: " + context));
+            }
+            messages.add(new UserMessage(question));
 
             String answer = chatClient.prompt()
-                    .user(userPrompt)
+                    .messages(messages)
                     .call()
                     .content();
 
@@ -87,9 +99,6 @@ public class TutorChatService {
     }
 
     private String buildContext(List<Document> documents) {
-//        if (documents.isEmpty()) {
-//            return "관련 정보를 찾을 수 없습니다.";
-//        }
         StringBuilder context = new StringBuilder();
 
         for (Document doc : documents) {
@@ -97,9 +106,5 @@ public class TutorChatService {
         }
 
         return context.toString();
-    }
-
-    private String buildPrompt(String question, String context) {
-        return String.format("참고 자료: %s, 질문: %s", context, question);
     }
 }
