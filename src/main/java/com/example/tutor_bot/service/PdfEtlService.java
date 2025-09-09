@@ -40,7 +40,7 @@ public class PdfEtlService {
                                     new ExtractedTextFormatter.Builder()
                                             .withNumberOfTopTextLinesToDelete(0)
                                             .withNumberOfBottomTextLinesToDelete(0)
-                                            .withNumberOfTopPagesToSkipBeforeDelete(1)
+                                            .withNumberOfTopPagesToSkipBeforeDelete(0)
                                             .withLeftAlignment(true)
                                             .build()
                             )

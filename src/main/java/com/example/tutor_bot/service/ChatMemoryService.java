@@ -39,6 +39,7 @@ public class ChatMemoryService {
 
     public List<String> getChatMessage(String lectureId, Long memberId) {
         String key = buildKey(lectureId, memberId);
+        List<String> chatHistory = redisTemplate.opsForList().range(key, 0, -1);
         return redisTemplate.opsForList().range(key, 0, -1);
     }
 }
