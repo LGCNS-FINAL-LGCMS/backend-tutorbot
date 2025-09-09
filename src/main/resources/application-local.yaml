@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: backend-tutor
   datasource:
     url: jdbc:postgresql://localhost:38121/tutor
     username: lgcms
@@ -45,7 +47,7 @@ spring:
             max-tokens: 1024
             temperature: 0.3
             search:
-              similarity-threshold: 0.6
+              similarity-threshold: 0.5
 
     vectorstore:
       pgvector:
@@ -57,17 +59,39 @@ spring:
 
   kafka:
     bootstrap-servers: http://192.168.0.161:38123
+    template:
+      observation-enabled: true
+    listener:
+      observation-enabled: true
+      ack-mode: manual
+
     consumer:
       group-id: ${spring.application.name}
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
       enable-auto-commit: false
-      auto-offset-reset: latest
+      auto-offset-reset: earliest
       max-poll-records: 10
       properties:
+        spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
         spring.json.trusted.packages: "*"
         spring.json.use.type.headers: false
+        spring.json.value.default.type: com.example.tutor_bot.common.kafka.dto.KafkaEvent
+
     producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
         spring.json.add.type.headers: false
 
 server:
   port: 38114  #tutor
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus,health,info
+  metrics:
+    tags:
+      application: ${spring.application.name}
