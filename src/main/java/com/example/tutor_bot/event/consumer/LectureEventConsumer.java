@@ -7,6 +7,7 @@ import com.example.tutor_bot.service.PdfEtlService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,9 +18,11 @@ public class LectureEventConsumer {
     private final KafkaEventFactory  kafkaEventFactory;
 
     // 토픽 구독 후 이벤트 받음
-    @KafkaListener(topics = "LECTURE_UPLOAD", containerFactory = "defaultFactory")
-    public void topicEvent(KafkaEvent<?> kafkaEvent) {
+    @KafkaListener(topics = "LECTURE_UPLOAD")
+    public void topicEvent(KafkaEvent<?> kafkaEvent, Acknowledgment ack) {
+        ack.acknowledge();
         LectureUploadDto uploadDto = kafkaEventFactory.convert(kafkaEvent, LectureUploadDto.class);
-        pdfEtlService.processUrlPdf(uploadDto.getBookKey());
+        pdfEtlService.processUrlPdf(uploadDto.getBookKey(), uploadDto.getLectureId());
+        log.info(kafkaEvent.toString());
     }
 }
